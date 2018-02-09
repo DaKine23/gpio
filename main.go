@@ -7,9 +7,46 @@ import (
 	"time"
 
 	"github.com/DaKine23/gpio/gpio"
+	"github.com/DaKine23/gpio/tui"
+	tb "github.com/nsf/termbox-go"
 )
 
 func main() {
+
+	err := tb.Init()
+	if err != nil {
+		panic(err)
+	}
+	defer tb.Close()
+
+	var ui tui.TUI
+	ui.DrawLed(5, 10, tb.ColorCyan, tb.ColorGreen, true)
+	ui.DrawLed(20, 10, tb.ColorRed, tb.ColorBlue, false)
+	ui.Draw()
+	time.Sleep(time.Second * 2)
+	ui.DrawLed(5, 10, tb.ColorCyan, tb.ColorGreen, false)
+	ui.DrawLed(20, 10, tb.ColorRed, tb.ColorBlue, true)
+	ui.Draw()
+	time.Sleep(time.Second * 2)
+	ui.DrawLed(5, 10, tb.ColorCyan, tb.ColorGreen, true)
+	ui.DrawLed(20, 10, tb.ColorRed, tb.ColorBlue, false)
+	ui.Draw()
+	time.Sleep(time.Second * 2)
+	ui.DrawLed(5, 10, tb.ColorCyan, tb.ColorGreen, false)
+	ui.DrawLed(20, 10, tb.ColorRed, tb.ColorBlue, true)
+	ui.Draw()
+	time.Sleep(time.Second * 2)
+	ui.DrawLed(5, 10, tb.ColorCyan, tb.ColorGreen, true)
+	ui.DrawLed(20, 10, tb.ColorRed, tb.ColorBlue, false)
+	ui.Draw()
+	time.Sleep(time.Second * 2)
+	ui.DrawLed(5, 10, tb.ColorCyan, tb.ColorGreen, false)
+	ui.DrawLed(20, 10, tb.ColorRed, tb.ColorBlue, true)
+	ui.Draw()
+	time.Sleep(time.Second * 2)
+
+}
+func do() {
 
 	pins2 := []string{"1", "3", "2", "4", "5", "6", "7", "8"}
 

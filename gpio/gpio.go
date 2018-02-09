@@ -57,9 +57,9 @@ type GPIO_LedSet struct {
 func (o *GPIO_LedSet) Oostring() (result string) {
 	for _, v := range o.Set {
 		if v.Value {
-			result += "O"
+			result += "✓"
 		} else {
-			result += "o"
+			result += "❌"
 		}
 	}
 	return
