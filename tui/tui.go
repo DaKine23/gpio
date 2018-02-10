@@ -1,6 +1,7 @@
 package tui
 
 import (
+	"github.com/DaKine23/gpio/gpio"
 	tb "github.com/nsf/termbox-go"
 )
 
@@ -21,7 +22,31 @@ func (o *TUI) Draw() error {
 
 var maxX, maxY int
 
-func (o *TUI) DrawLed(x, y int, color, color2 tb.Attribute, isOn bool) {
+func (o *TUI) DrawLedStrip(ledStrip *gpio.GPIO_LedSet, offset, columns int, isHorizontal bool, color, color2 tb.Attribute) {
+	x, y := tb.Size()
+	stripSize := len(ledStrip.Set)
+
+	colLength := stripSize / columns
+	if stripSize%2 != 0 {
+		colLength++
+	}
+	if isHorizontal {
+
+		distance := x / stripSize * columns
+		for k, v := range ledStrip.Set {
+			o.DrawLed(distance/2+(k%colLength)*distance, offset*((k/colLength)+1), color, color2, bool(v.Value), v.Selected)
+		}
+	} else {
+
+		distance := y / stripSize * columns
+		for k, v := range ledStrip.Set {
+			o.DrawLed(offset*((k/colLength)+1), distance/2+(k%colLength)*distance, color, color2, bool(v.Value), v.Selected)
+		}
+	}
+
+}
+
+func (o *TUI) DrawLed(x, y int, color, color2 tb.Attribute, isOn, isSelected bool) {
 
 	maxX, maxY = tb.Size()
 
@@ -47,6 +72,19 @@ func (o *TUI) DrawLed(x, y int, color, color2 tb.Attribute, isOn bool) {
 	} else {
 
 		tb.SetCell(x, y, ' ', tb.ColorWhite, color2)
+	}
+	if isSelected {
+
+		tb.SetCell(x+1, y+1, ' ', tb.ColorWhite, tb.ColorYellow)
+		tb.SetCell(x-1, y+1, ' ', tb.ColorWhite, tb.ColorYellow)
+		tb.SetCell(x-1, y-1, ' ', tb.ColorWhite, tb.ColorYellow)
+		tb.SetCell(x+1, y-1, ' ', tb.ColorWhite, tb.ColorYellow)
+	} else {
+		tb.SetCell(x+1, y+1, ' ', tb.ColorDefault, tb.ColorDefault)
+		tb.SetCell(x-1, y+1, ' ', tb.ColorDefault, tb.ColorDefault)
+		tb.SetCell(x-1, y-1, ' ', tb.ColorDefault, tb.ColorDefault)
+		tb.SetCell(x+1, y-1, ' ', tb.ColorDefault, tb.ColorDefault)
+
 	}
 
 }

@@ -2,6 +2,9 @@ package gpio
 
 import (
 	"errors"
+	"sync"
+
+	"github.com/DaKine23/gpio/control"
 )
 
 const (
@@ -15,6 +18,7 @@ type GPIO_Pin struct {
 	Port      string
 	Direction Direction
 	Value     Value
+	control.Selectable
 }
 
 type Value bool
@@ -51,9 +55,49 @@ func (o *GPIO_Pin) Write(flowID string) error {
 type GPIO struct {
 }
 type GPIO_LedSet struct {
-	Set []GPIO_Pin
+	Set   []GPIO_Pin
+	Mutex sync.Mutex
+	control.Selectable
 }
 
+func (o *GPIO_LedSet) SwitchSelected() {
+
+	for i := range o.Set {
+		if o.Set[i].Selected {
+			o.Set[i].Value = !o.Set[i].Value
+		}
+	}
+
+}
+
+func (o *GPIO_LedSet) SelectNext(offset int, direction bool) {
+	o.Mutex.Lock()
+	var j int
+	var temp bool
+	for n := 0; n < offset; n++ {
+		if direction {
+			temp = o.Set[len(o.Set)-1].Selected
+		} else {
+			temp = o.Set[0].Selected
+		}
+
+		for i := 0; i < len(o.Set); i++ {
+			if direction {
+				j = i
+			} else {
+				j = len(o.Set) - i - 1
+			}
+			temp, o.Set[j].Selected = o.Set[j].Selected, temp
+		}
+	}
+	o.Mutex.Unlock()
+}
+
+func (o *GPIO_LedSet) Write(flowID string) {
+	for _, v := range o.Set {
+		v.Write(flowID)
+	}
+}
 func (o *GPIO_LedSet) Oostring() (result string) {
 	for _, v := range o.Set {
 		if v.Value {
@@ -70,7 +114,11 @@ func (o *GPIO) NewLedSet(ports ...string) *GPIO_LedSet {
 	ledSet := GPIO_LedSet{}
 	ledSet.Set = make([]GPIO_Pin, 0, len(ports))
 	for _, v := range ports {
-		ledSet.Set = append(ledSet.Set, GPIO_Pin{v, true, false})
+		ledSet.Set = append(ledSet.Set, GPIO_Pin{
+			Port:      v,
+			Direction: true,
+			Value:     false,
+		})
 	}
 	return &ledSet
 }
@@ -92,13 +140,10 @@ func (o *GPIO_LedSet) AllOff(flowID string) {
 		v.Write(flowID)
 	}
 }
-func (o *GPIO_LedSet) AllSwitch(flowID string) {
+func (o *GPIO_LedSet) AllSwitch() {
 	for i, _ := range o.Set {
 		o.Set[i].SwitchValue()
 
-	}
-	for _, v := range o.Set {
-		v.Write(flowID)
 	}
 }
 func (o *GPIO_LedSet) SingleOn(flowID, port string) {
@@ -125,7 +170,7 @@ func (o *GPIO_LedSet) SingleSwitch(flowID, port string) {
 		}
 	}
 }
-func (o *GPIO_LedSet) Move(flowID string, direction bool) {
+func (o *GPIO_LedSet) Move(direction bool) {
 
 	var j int
 	var temp Value
@@ -142,7 +187,6 @@ func (o *GPIO_LedSet) Move(flowID string, direction bool) {
 			j = len(o.Set) - i - 1
 		}
 		temp, o.Set[j].Value = o.Set[j].Value, temp
-		o.Set[j].Write(flowID)
 	}
 }
 

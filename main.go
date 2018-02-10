@@ -1,15 +1,16 @@
 package main
 
 import (
-	"fmt"
 	"os"
 	"strconv"
-	"time"
 
 	"github.com/DaKine23/gpio/gpio"
 	"github.com/DaKine23/gpio/tui"
 	tb "github.com/nsf/termbox-go"
 )
+
+var tu *tui.TUI
+var gp *gpio.GPIO
 
 func main() {
 
@@ -19,75 +20,83 @@ func main() {
 	}
 	defer tb.Close()
 
-	var ui tui.TUI
-	ui.DrawLed(5, 10, tb.ColorCyan, tb.ColorGreen, true)
-	ui.DrawLed(20, 10, tb.ColorRed, tb.ColorBlue, false)
-	ui.Draw()
-	time.Sleep(time.Second * 2)
-	ui.DrawLed(5, 10, tb.ColorCyan, tb.ColorGreen, false)
-	ui.DrawLed(20, 10, tb.ColorRed, tb.ColorBlue, true)
-	ui.Draw()
-	time.Sleep(time.Second * 2)
-	ui.DrawLed(5, 10, tb.ColorCyan, tb.ColorGreen, true)
-	ui.DrawLed(20, 10, tb.ColorRed, tb.ColorBlue, false)
-	ui.Draw()
-	time.Sleep(time.Second * 2)
-	ui.DrawLed(5, 10, tb.ColorCyan, tb.ColorGreen, false)
-	ui.DrawLed(20, 10, tb.ColorRed, tb.ColorBlue, true)
-	ui.Draw()
-	time.Sleep(time.Second * 2)
-	ui.DrawLed(5, 10, tb.ColorCyan, tb.ColorGreen, true)
-	ui.DrawLed(20, 10, tb.ColorRed, tb.ColorBlue, false)
-	ui.Draw()
-	time.Sleep(time.Second * 2)
-	ui.DrawLed(5, 10, tb.ColorCyan, tb.ColorGreen, false)
-	ui.DrawLed(20, 10, tb.ColorRed, tb.ColorBlue, true)
-	ui.Draw()
-	time.Sleep(time.Second * 2)
-
-}
-func do() {
-
 	pins2 := []string{"1", "3", "2", "4", "5", "6", "7", "8"}
 
-	delay := 0
+	colnum := 1
 
 	if len(os.Args) > 3 {
 
-		delay, _ = strconv.Atoi(os.Args[1])
+		coln, err := strconv.Atoi(os.Args[1])
+		if err != nil {
+			panic(os.Args[1])
+		}
+		colnum = coln
+		pins2 = os.Args[1:]
 
-		pins2 = os.Args[2:]
 	}
-
-	i := 0
-	var gp *gpio.GPIO
 
 	strip := gp.NewLedSet(pins2...)
-	strip.SingleOn("strip", "1")
-	strip.SingleOn("strip", "2")
-	fmt.Println(strip.Oostring())
-	fmt.Println("----move r-----")
+	strip.Set[0].Selected = true
+	tu.DrawLedStrip(strip, 10, colnum, true, tb.ColorBlue, tb.ColorBlack)
+	tu.Draw()
+	event := tb.PollEvent()
+	odd := 0
+	if len(strip.Set)%2 != 0 {
+		odd++
+	}
+	for event.Key != tb.KeyEsc {
 
-	for i < 9 {
-		time.Sleep(time.Duration(delay) * time.Millisecond)
-		strip.Move("move right", true)
-		fmt.Println(strip.Oostring())
-		i++
+		event = tb.PollEvent()
+		if event.Key == tb.KeyArrowRight {
+			strip.SelectNext(1, true)
+			tu.DrawLedStrip(strip, 10, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			tu.Draw()
+			strip.Write("")
+
+		}
+		if event.Key == tb.KeyArrowLeft {
+			strip.SelectNext(1, false)
+			tu.DrawLedStrip(strip, 10, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			tu.Draw()
+			strip.Write("")
+		}
+		if event.Key == tb.KeyArrowDown {
+
+			strip.SelectNext(len(strip.Set)/colnum+odd, true)
+			tu.DrawLedStrip(strip, 10, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			tu.Draw()
+			strip.Write("")
+		}
+		if event.Key == tb.KeyArrowUp {
+			strip.SelectNext(len(strip.Set)/colnum+odd, false)
+			tu.DrawLedStrip(strip, 10, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			tu.Draw()
+			strip.Write("")
+		}
+		if event.Key == tb.KeyEnter {
+			strip.SwitchSelected()
+			tu.DrawLedStrip(strip, 10, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			tu.Draw()
+			strip.Write("")
+		}
+		if event.Key == tb.KeyPgup {
+			strip.Move(true)
+			tu.DrawLedStrip(strip, 10, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			tu.Draw()
+			strip.Write("")
+		}
+		if event.Key == tb.KeyPgdn {
+			strip.Move(false)
+			tu.DrawLedStrip(strip, 10, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			tu.Draw()
+			strip.Write("")
+		}
+		if event.Key == tb.KeyEnd {
+			strip.AllSwitch()
+			tu.DrawLedStrip(strip, 10, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			tu.Draw()
+			strip.Write("")
+		}
 	}
-	i = 0
-	fmt.Println("----move l-----")
-	for i < 9 {
-		time.Sleep(time.Duration(delay) * time.Millisecond)
-		strip.Move("move left", false)
-		fmt.Println(strip.Oostring())
-		i++
-	}
-	fmt.Println("----switch-----")
-	time.Sleep(time.Duration(delay) * time.Millisecond)
-	strip.AllSwitch("strip")
-	fmt.Println(strip.Oostring())
-	time.Sleep(time.Duration(delay) * time.Millisecond)
-	strip.AllSwitch("strip")
-	fmt.Println(strip.Oostring())
 
 }
