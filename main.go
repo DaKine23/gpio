@@ -39,7 +39,8 @@ func main() {
 	}
 
 	strip := gp.NewLedSet(pins2...)
-	strip.Set[0].Selected = true
+	strip.Add("10")
+	//strip.Set[0].Selected = true
 	tu.DrawLedStrip(strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
 	tu.Draw()
 	var event tb.Event
