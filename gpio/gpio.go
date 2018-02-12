@@ -123,6 +123,62 @@ func (o *GPIO) NewLedSet(ports ...string) *GPIO_LedSet {
 	return &ledSet
 }
 
+func (o *GPIO_LedSet) RemoveSelected() *GPIO_LedSet {
+
+	if len(o.Set) < 1 {
+		return o
+	}
+	for i := range o.Set {
+		if o.Set[i].Selected {
+			if i == len(o.Set)-1 {
+				o.Set = o.Set[:i]
+				if len(o.Set) > 0 {
+					o.Set[0].Selected = true
+				}
+
+			} else {
+				o.Set[i+1].Selected = true
+				o.Set = append(o.Set[:i], o.Set[i+1:]...)
+			}
+
+			return o
+		}
+	}
+
+	return o
+
+}
+
+func (o *GPIO_LedSet) Add(port string) *GPIO_LedSet {
+
+	lastSelected := 0
+	for i := range o.Set {
+
+		if o.Set[i].Selected {
+			lastSelected = i
+		}
+		o.Set[i].Selected = false
+	}
+	lastSelected++
+
+	pin := GPIO_Pin{
+		Port:      port,
+		Direction: true,
+		Value:     false,
+	}
+	pin.Selected = true
+	if len(o.Set) > 0 {
+		o.Set = append(o.Set, pin)
+		copy(o.Set[lastSelected+1:], o.Set[lastSelected:])
+		o.Set[lastSelected] = pin
+	} else {
+		o.Set = append(o.Set, pin)
+	}
+
+	//	o.Set = append(o.Set[:lastSelected], append([]GPIO_Pin{pin}, o.Set[lastSelected:]...)...)
+
+	return o
+}
 func (o *GPIO_LedSet) AllOn(flowID string) {
 	for i, _ := range o.Set {
 		o.Set[i].SetValue(true)
