@@ -3,19 +3,26 @@ window.addEventListener("load", function(evt) {
 
     var draw = function(stringSet) {
 
-        window.console.log(JSON.stringify(stringSet))
         output.innerHTML = "";
 
         var ledStrip = document.createElement("div");
-        ledStrip.setAttribute("class", "");
+        ledStrip.setAttribute("class", "jumbotron");
+        var titlebox = document.createElement("h2")
         var title = document.createTextNode("Led Strip");
-        ledStrip.appendChild(title);
-
-
+        titlebox.appendChild(title)
+        ledStrip.appendChild(titlebox);
 
 
         for (var element of stringSet.set) {
-            var led = document.createElement("div");
+            var led = document.createElement("button");
+            if (element.selected) {
+                led.setAttribute("class", "btn btn-warning")
+            } else {
+                led.setAttribute("class", "btn")
+            }
+
+
+
             var port = document.createTextNode(element.port);
             led.appendChild(port);
             if (element.value) {
@@ -41,33 +48,96 @@ window.addEventListener("load", function(evt) {
     };
 
     $.get("all", function(data) {
-        window.console.log(JSON.stringify(data));
         draw(data);
     });
+
+
+    var ws;
+    if (ws) {
+        return false;
+    }
+    ws = new WebSocket("ws://" + window.location.host + "/ws");
+    ws.onopen = function(evt) {
+
+    }
+    ws.onclose = function(evt) {
+
+        ws = null;
+
+    }
+    ws.onmessage = function(evt) {
+
+
+        var obj = JSON.parse(evt.data)
+        draw(obj)
+
+
+    }
+    ws.onerror = function(evt) {
+
+    }
+
+
+
+
+    return false;
+
+
+
 });
 
+function selectNext() {
+    $.post("next", function(data) {
 
-// if (ws) {
-//     return false;
-// }
-// ws = new WebSocket("ws://" + window.location.host + "/ws");
-// ws.onopen = function(evt) {
-//     print("connection established");
-// }
-// ws.onclose = function(evt) {
-//     print("connection closed");
-//     ws = null;
+    });
+};
 
-// }
-// ws.onmessage = function(evt) {
+function addPort() {
+
+    portElement = document.getElementById("port")
+
+    port = portElement.value;
+    portElement.value = ""
+
+    $.post("add/" + port, function(data) {
+
+    });
+};
+
+function remove() {
+    $.post("remove", function(data) {
+
+    });
+};
 
 
-//     var obj = JSON.parse(evt.data)
-//     draw(obj)
 
+function selectPrevious() {
+    $.post("previous", function(data) {
 
-// }
-// ws.onerror = function(evt) {
-//     print("ERROR: " + evt);
-// }
-// return false;
+    });
+};
+
+function moveRight() {
+    $.post("move/right", function(data) {
+
+    });
+};
+
+function moveLeft() {
+    $.post("move/left", function(data) {
+
+    });
+};
+
+function switchSelected() {
+    $.post("switch/selected", function(data) {
+
+    });
+};
+
+function switchAll() {
+    $.post("switch/all", function(data) {
+
+    });
+};

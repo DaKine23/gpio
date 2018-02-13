@@ -17,6 +17,38 @@
 
     <div id="rootcontainer" class="container">
     </div>
+
+    <div class="container">
+        <div class="row">
+            <div class="col-lg-1"> </div>
+            <div class="col-lg-1"> <button class="btn btn-block btn-primary"><span class="glyphicon glyphicon-arrow-up"></span> </button> </div>
+            <div class="col-lg-2"> </div>
+
+            <div class="col-lg-1"> <button class="btn btn-block btn-primary" onclick="moveRight()"><span class="glyphicon glyphicon-export"></span> </button> </div>
+            <div class="col-lg-1"> <button class="btn btn-block btn-primary" onclick="switchSelected()"><span class="glyphicon glyphicon-certificate"></span> </button> </div>
+            <div class="col-lg-3"> <button class="btn btn-block btn-success" onclick="addPort()"><span class="glyphicon glyphicon glyphicon-plus"></span> </button> </div>
+            <div class="col-lg-1"> <button class="btn btn-block btn-danger" onclick="remove()"><span class="glyphicon glyphicon-minus"></span> </button> </div>
+
+
+        </div>
+        <div class="row">
+            <div class="col-lg-1"> <button class="btn btn-block btn-primary" onclick="selectPrevious()"><span class="glyphicon glyphicon-arrow-left"></span> </button> </div>
+            <div class="col-lg-1"> <button class="btn btn-block btn-primary"><span class="glyphicon glyphicon-arrow-down"></span> </button> </div>
+            <div class="col-lg-1"> <button class="btn btn-block btn-primary" onclick="selectNext()"><span class="glyphicon glyphicon-arrow-right"></span> </button> </div>
+            <div class="col-lg-1"> </div>
+            <div class="col-lg-1"> <button class="btn btn-block btn-primary" onclick="moveLeft()"><span class="glyphicon glyphicon-import"></span> </button> </div>
+            <div class="col-lg-1"> <button class="btn btn-block btn-primary" onclick="switchAll()"><span class="glyphicon glyphicon-random"></span> </button> </div>
+            <div class="col-lg-3">
+
+                <div class="form-group">
+                    <input type="text" class="form-control" id="port">
+                </div>
+
+            </div>
+
+
+        </div>
+    </div>
 </body>
 
 </html>

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"os"
 	"strconv"
 
@@ -8,6 +9,7 @@ import (
 	"github.com/DaKine23/gpio/router"
 	"github.com/DaKine23/gpio/tui"
 	tb "github.com/nsf/termbox-go"
+	"github.com/olahol/melody"
 )
 
 var tu *tui.TUI
@@ -20,21 +22,25 @@ func main() {
 	}
 	defer tb.Close()
 
-	colnum := 1
+	data.Colnum = 1
 
 	if len(os.Args) > 1 {
 		coln, err := strconv.Atoi(os.Args[1])
 		if err != nil {
 			panic(os.Args[1])
 		}
-		colnum = coln
+		data.Colnum = coln
 	}
 	data.Init()
 	//data.Strip.Set[0].Selected = true
 
 	go router.Init()
 
-	tu.DrawLedStrip(data.Strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
+	m := melody.New()
+	defer m.Close()
+	router.SetDefaultWebsocketHandler(m)
+
+	tu.DrawLedStrip(data.Strip, data.Offset, data.Colnum, true, tb.ColorBlue, tb.ColorBlack)
 	tu.Draw()
 	var event tb.Event
 	odd := 0
@@ -54,16 +60,27 @@ func main() {
 			tb.Flush()
 
 			data.Strip.Add(port)
-			tu.DrawLedStrip(data.Strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			tu.DrawLedStrip(data.Strip, data.Offset, data.Colnum, true, tb.ColorBlue, tb.ColorBlack)
 			tu.Draw()
+
+			bs, _ := json.Marshal(data.Strip)
+			if bs != nil {
+				m.Broadcast(bs)
+			}
+
 			data.Strip.Write("")
 
 		}
 		if event.Ch == '-' {
 
 			data.Strip.RemoveSelected()
-			tu.DrawLedStrip(data.Strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			tu.DrawLedStrip(data.Strip, data.Offset, data.Colnum, true, tb.ColorBlue, tb.ColorBlack)
 			tu.Draw()
+
+			bs, _ := json.Marshal(data.Strip)
+			if bs != nil {
+				m.Broadcast(bs)
+			}
 			data.Strip.Write("")
 
 		}
@@ -72,52 +89,96 @@ func main() {
 
 		if event.Key == tb.KeyArrowRight {
 			data.Strip.SelectNext(1, true)
-			tu.DrawLedStrip(data.Strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			tu.DrawLedStrip(data.Strip, data.Offset, data.Colnum, true, tb.ColorBlue, tb.ColorBlack)
 			tu.Draw()
+			bs, _ := json.Marshal(data.Strip)
+			if bs != nil {
+				m.Broadcast(bs)
+			}
 			data.Strip.Write("")
 
 		}
 		if event.Key == tb.KeyArrowLeft {
 			data.Strip.SelectNext(1, false)
-			tu.DrawLedStrip(data.Strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			tu.DrawLedStrip(data.Strip, data.Offset, data.Colnum, true, tb.ColorBlue, tb.ColorBlack)
 			tu.Draw()
+			bs, _ := json.Marshal(data.Strip)
+			if bs != nil {
+				m.Broadcast(bs)
+			}
 			data.Strip.Write("")
 		}
 		if event.Key == tb.KeyArrowDown {
 
-			data.Strip.SelectNext(len(data.Strip.Set)/colnum+odd, true)
-			tu.DrawLedStrip(data.Strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			data.Strip.SelectNext(len(data.Strip.Set)/data.Colnum+odd, true)
+			tu.DrawLedStrip(data.Strip, data.Offset, data.Colnum, true, tb.ColorBlue, tb.ColorBlack)
 			tu.Draw()
+
+			bs, _ := json.Marshal(data.Strip)
+			if bs != nil {
+				m.Broadcast(bs)
+			}
+
 			data.Strip.Write("")
 		}
 		if event.Key == tb.KeyArrowUp {
-			data.Strip.SelectNext(len(data.Strip.Set)/colnum+odd, false)
-			tu.DrawLedStrip(data.Strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			data.Strip.SelectNext(len(data.Strip.Set)/data.Colnum+odd, false)
+			tu.DrawLedStrip(data.Strip, data.Offset, data.Colnum, true, tb.ColorBlue, tb.ColorBlack)
 			tu.Draw()
+
+			bs, _ := json.Marshal(data.Strip)
+			if bs != nil {
+				m.Broadcast(bs)
+			}
+
 			data.Strip.Write("")
 		}
 		if event.Key == tb.KeyEnter {
 			data.Strip.SwitchSelected()
-			tu.DrawLedStrip(data.Strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			tu.DrawLedStrip(data.Strip, data.Offset, data.Colnum, true, tb.ColorBlue, tb.ColorBlack)
 			tu.Draw()
+
+			bs, _ := json.Marshal(data.Strip)
+			if bs != nil {
+				m.Broadcast(bs)
+			}
+
 			data.Strip.Write("")
 		}
 		if event.Key == tb.KeyPgup {
 			data.Strip.Move(true)
-			tu.DrawLedStrip(data.Strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			tu.DrawLedStrip(data.Strip, data.Offset, data.Colnum, true, tb.ColorBlue, tb.ColorBlack)
 			tu.Draw()
+
+			bs, _ := json.Marshal(data.Strip)
+			if bs != nil {
+				m.Broadcast(bs)
+			}
+
 			data.Strip.Write("")
 		}
 		if event.Key == tb.KeyPgdn {
 			data.Strip.Move(false)
-			tu.DrawLedStrip(data.Strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			tu.DrawLedStrip(data.Strip, data.Offset, data.Colnum, true, tb.ColorBlue, tb.ColorBlack)
 			tu.Draw()
+
+			bs, _ := json.Marshal(data.Strip)
+			if bs != nil {
+				m.Broadcast(bs)
+			}
+
 			data.Strip.Write("")
 		}
 		if event.Key == tb.KeyEnd {
 			data.Strip.AllSwitch()
-			tu.DrawLedStrip(data.Strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			tu.DrawLedStrip(data.Strip, data.Offset, data.Colnum, true, tb.ColorBlue, tb.ColorBlack)
 			tu.Draw()
+
+			bs, _ := json.Marshal(data.Strip)
+			if bs != nil {
+				m.Broadcast(bs)
+			}
+
 			data.Strip.Write("")
 		}
 	}
