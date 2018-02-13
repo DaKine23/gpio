@@ -15,9 +15,9 @@ const (
 )
 
 type GPIO_Pin struct {
-	Port      string
-	Direction Direction
-	Value     Value
+	Port      string    `json:"port,omitempty"`
+	Direction Direction `json:"direction,omitempty"`
+	Value     Value     `json:"value"`
 	control.Selectable
 }
 
@@ -55,8 +55,8 @@ func (o *GPIO_Pin) Write(flowID string) error {
 type GPIO struct {
 }
 type GPIO_LedSet struct {
-	Set   []GPIO_Pin
-	Mutex sync.Mutex
+	Set   []GPIO_Pin `json:"set,omitempty"`
+	Mutex sync.Mutex `json:"-"`
 	control.Selectable
 }
 

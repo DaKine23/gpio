@@ -4,13 +4,13 @@ import (
 	"os"
 	"strconv"
 
-	"github.com/DaKine23/gpio/gpio"
+	"github.com/DaKine23/gpio/data"
+	"github.com/DaKine23/gpio/router"
 	"github.com/DaKine23/gpio/tui"
 	tb "github.com/nsf/termbox-go"
 )
 
 var tu *tui.TUI
-var gp *gpio.GPIO
 
 func main() {
 
@@ -19,8 +19,6 @@ func main() {
 		panic(err)
 	}
 	defer tb.Close()
-
-	pins2 := []string{}
 
 	colnum := 1
 
@@ -31,21 +29,16 @@ func main() {
 		}
 		colnum = coln
 	}
+	data.Init()
+	//data.Strip.Set[0].Selected = true
 
-	if len(os.Args) > 2 {
+	go router.Init()
 
-		pins2 = os.Args[2:]
-
-	}
-
-	strip := gp.NewLedSet(pins2...)
-	strip.Add("10")
-	//strip.Set[0].Selected = true
-	tu.DrawLedStrip(strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
+	tu.DrawLedStrip(data.Strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
 	tu.Draw()
 	var event tb.Event
 	odd := 0
-	if len(strip.Set)%2 != 0 {
+	if len(data.Strip.Set)%2 != 0 {
 		odd++
 	}
 	for event.Key != tb.KeyEsc {
@@ -60,72 +53,72 @@ func main() {
 			tb.Clear(tb.ColorBlack, tb.ColorBlack)
 			tb.Flush()
 
-			strip.Add(port)
-			tu.DrawLedStrip(strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			data.Strip.Add(port)
+			tu.DrawLedStrip(data.Strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
 			tu.Draw()
-			strip.Write("")
+			data.Strip.Write("")
 
 		}
 		if event.Ch == '-' {
 
-			strip.RemoveSelected()
-			tu.DrawLedStrip(strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			data.Strip.RemoveSelected()
+			tu.DrawLedStrip(data.Strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
 			tu.Draw()
-			strip.Write("")
+			data.Strip.Write("")
 
 		}
 
 		// (CR)U(D)
 
 		if event.Key == tb.KeyArrowRight {
-			strip.SelectNext(1, true)
-			tu.DrawLedStrip(strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			data.Strip.SelectNext(1, true)
+			tu.DrawLedStrip(data.Strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
 			tu.Draw()
-			strip.Write("")
+			data.Strip.Write("")
 
 		}
 		if event.Key == tb.KeyArrowLeft {
-			strip.SelectNext(1, false)
-			tu.DrawLedStrip(strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			data.Strip.SelectNext(1, false)
+			tu.DrawLedStrip(data.Strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
 			tu.Draw()
-			strip.Write("")
+			data.Strip.Write("")
 		}
 		if event.Key == tb.KeyArrowDown {
 
-			strip.SelectNext(len(strip.Set)/colnum+odd, true)
-			tu.DrawLedStrip(strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			data.Strip.SelectNext(len(data.Strip.Set)/colnum+odd, true)
+			tu.DrawLedStrip(data.Strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
 			tu.Draw()
-			strip.Write("")
+			data.Strip.Write("")
 		}
 		if event.Key == tb.KeyArrowUp {
-			strip.SelectNext(len(strip.Set)/colnum+odd, false)
-			tu.DrawLedStrip(strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			data.Strip.SelectNext(len(data.Strip.Set)/colnum+odd, false)
+			tu.DrawLedStrip(data.Strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
 			tu.Draw()
-			strip.Write("")
+			data.Strip.Write("")
 		}
 		if event.Key == tb.KeyEnter {
-			strip.SwitchSelected()
-			tu.DrawLedStrip(strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			data.Strip.SwitchSelected()
+			tu.DrawLedStrip(data.Strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
 			tu.Draw()
-			strip.Write("")
+			data.Strip.Write("")
 		}
 		if event.Key == tb.KeyPgup {
-			strip.Move(true)
-			tu.DrawLedStrip(strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			data.Strip.Move(true)
+			tu.DrawLedStrip(data.Strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
 			tu.Draw()
-			strip.Write("")
+			data.Strip.Write("")
 		}
 		if event.Key == tb.KeyPgdn {
-			strip.Move(false)
-			tu.DrawLedStrip(strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			data.Strip.Move(false)
+			tu.DrawLedStrip(data.Strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
 			tu.Draw()
-			strip.Write("")
+			data.Strip.Write("")
 		}
 		if event.Key == tb.KeyEnd {
-			strip.AllSwitch()
-			tu.DrawLedStrip(strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
+			data.Strip.AllSwitch()
+			tu.DrawLedStrip(data.Strip, 4, colnum, true, tb.ColorBlue, tb.ColorBlack)
 			tu.Draw()
-			strip.Write("")
+			data.Strip.Write("")
 		}
 	}
 

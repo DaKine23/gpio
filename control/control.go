@@ -1,5 +1,5 @@
 package control
 
 type Selectable struct {
-	Selected bool
+	Selected bool `json:"selected,omitempty"`
 }

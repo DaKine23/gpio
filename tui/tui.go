@@ -79,7 +79,7 @@ func (o *TUI) TextRequestModal(question string, fg, bg tb.Attribute) string {
 			if len(answer) > 0 {
 				answer = answer[:len(answer)-1]
 			}
-		} else if event.Key != tb.KeySpace {
+		} else if event.Key != tb.KeySpace && event.Ch != '\u0000' {
 			answer += string(event.Ch)
 		}
 
